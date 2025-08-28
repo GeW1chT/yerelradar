@@ -13,7 +13,7 @@ const cities = [
     slug: 'istanbul', 
     businessCount: 15420, 
     reviewCount: 89500,
-    image: '/cities/istanbul.jpg',
+    image: 'https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=400&h=300&fit=crop',
     districts: ['Beşiktaş', 'Kadıköy', 'Şişli', 'Beyoğlu']
   },
   { 
@@ -21,7 +21,7 @@ const cities = [
     slug: 'ankara', 
     businessCount: 8760, 
     reviewCount: 42300,
-    image: '/cities/ankara.jpg',
+    image: 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400&h=300&fit=crop',
     districts: ['Çankaya', 'Kızılay', 'Bahçelievler']
   },
   { 
@@ -29,7 +29,7 @@ const cities = [
     slug: 'izmir', 
     businessCount: 6890, 
     reviewCount: 35600,
-    image: '/cities/izmir.jpg',
+    image: 'https://images.unsplash.com/photo-1535262473814-0a07c8ab03dd?w=400&h=300&fit=crop',
     districts: ['Alsancak', 'Konak', 'Bornova']
   },
   { 
@@ -37,7 +37,7 @@ const cities = [
     slug: 'antalya', 
     businessCount: 4520, 
     reviewCount: 28900,
-    image: '/cities/antalya.jpg',
+    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
     districts: ['Kaleiçi', 'Lara', 'Muratpaşa']
   },
 ]

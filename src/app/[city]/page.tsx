@@ -1,49 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Filter, MapPin, TrendingUp, Star, Grid, List, Map } from 'lucide-react'
 import { BusinessCard } from '@/components/BusinessCard'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Business, SearchFilters, PriceRange } from '@/types'
-
-// Mock data for development
-const mockBusinesses: Business[] = [
-  {
-    id: '1',
-    name: 'Köşe Pizza',
-    slug: 'kose-pizza-besiktas',
-    description: '25 yıldır aynı lezzet...',
-    category: 'Restoran',
-    subcategory: 'Pizza',
-    city: 'İstanbul',
-    district: 'Beşiktaş',
-    neighborhood: 'Levent',
-    address: 'Barbaros Bulvarı No:45',
-    lat: 41.0431,
-    lng: 29.0099,
-    phone: '02122341234',
-    website: 'kosepizza.com',
-    email: 'info@kosepizza.com',
-    verified: true,
-    isPremium: false,
-    avgRating: 4.2,
-    totalReviews: 128,
-    totalCheckIns: 45,
-    healthScore: 8.5,
-    hygieneScore: 9.0,
-    serviceScore: 8.2,
-    valueScore: 7.8,
-    trendScore: 8.8,
-    aiSummary: 'Müşteriler lezzetini ve hızlı servisini övüyor...',
-    priceRange: 'MODERATE' as PriceRange,
-    covidSafety: 8.5,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-  // Add more mock businesses...
-]
 
 const categories = [
   { name: 'Tümü', slug: '', count: 1240 },
@@ -68,29 +31,46 @@ const priceRanges = [
 ]
 
 interface CityPageProps {
-  params: { city: string }
+  params: Promise<{ city: string }>
 }
 
 export default function CityPage({ params }: CityPageProps) {
+  const resolvedParams = use(params)
   const [filters, setFilters] = useState<SearchFilters>({
-    city: params.city,
+    city: resolvedParams.city,
     sortBy: 'rating'
   })
   
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid')
   const [showFilters, setShowFilters] = useState(false)
 
-  // Mock API call
-  const { data: businesses, isLoading } = useQuery({
-    queryKey: ['businesses', params.city, filters],
+  // API call to fetch businesses
+  const { data: businessesData, isLoading } = useQuery({
+    queryKey: ['businesses', resolvedParams.city, filters],
     queryFn: async () => {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      return mockBusinesses
+      const searchParams = new URLSearchParams({
+        city: resolvedParams.city,
+        ...(filters.category && { category: filters.category }),
+        ...(filters.district && { district: filters.district }),
+        ...(filters.sortBy && { sortBy: filters.sortBy }),
+        ...(filters.query && { query: filters.query }),
+        ...(filters.rating && { minRating: filters.rating.toString() }),
+        ...(filters.priceRange?.length && { priceRange: filters.priceRange.join(',') }),
+        ...(filters.isOpen && { isOpen: 'true' }),
+        ...(filters.hasDelivery && { hasDelivery: 'true' })
+      })
+      
+      const response = await fetch(`/api/businesses?${searchParams}`)
+      if (!response.ok) {
+        throw new Error('Businesses fetch failed')
+      }
+      return response.json()
     }
   })
+  
+  const businesses = businessesData?.data || []
 
-  const cityName = params.city.charAt(0).toUpperCase() + params.city.slice(1)
+  const cityName = resolvedParams.city.charAt(0).toUpperCase() + resolvedParams.city.slice(1)
 
   const updateFilter = (key: keyof SearchFilters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }))
@@ -128,11 +108,12 @@ export default function CityPage({ params }: CityPageProps) {
           {/* Sidebar Filters */}
           <div className={`${showFilters ? 'block' : 'hidden'} lg:block w-80 bg-white rounded-xl shadow-sm p-6 h-fit sticky top-24`}>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold">Filtreler</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Filtreler</h3>
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => setFilters({ city: params.city, sortBy: 'rating' })}
+                className="bg-white text-gray-900 border-gray-600 hover:bg-gray-50 hover:border-gray-700 font-medium shadow-sm"
+                onClick={() => setFilters({ city: resolvedParams.city, sortBy: 'rating' })}
               >
                 Temizle
               </Button>
@@ -140,10 +121,10 @@ export default function CityPage({ params }: CityPageProps) {
 
             {/* Categories */}
             <div className="mb-6">
-              <h4 className="font-medium mb-3">Kategoriler</h4>
+              <h4 className="font-medium mb-3 text-gray-900">Kategoriler</h4>
               <div className="space-y-2">
                 {categories.map((category) => (
-                  <label key={category.slug} className="flex items-center">
+                  <label key={category.slug} className="flex items-center cursor-pointer">
                     <input
                       type="radio"
                       name="category"
@@ -152,7 +133,7 @@ export default function CityPage({ params }: CityPageProps) {
                       onChange={(e) => updateFilter('category', e.target.value)}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="ml-3 text-sm">
+                    <span className="ml-3 text-sm text-gray-900 font-medium">
                       {category.name} ({category.count})
                     </span>
                   </label>
@@ -162,11 +143,11 @@ export default function CityPage({ params }: CityPageProps) {
 
             {/* Districts */}
             <div className="mb-6">
-              <h4 className="font-medium mb-3">Bölgeler</h4>
+              <h4 className="font-medium mb-3 text-gray-900">Bölgeler</h4>
               <select
                 value={filters.district || ''}
                 onChange={(e) => updateFilter('district', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium"
               >
                 {districts.map((district) => (
                   <option key={district} value={district === 'Tümü' ? '' : district}>
@@ -178,10 +159,10 @@ export default function CityPage({ params }: CityPageProps) {
 
             {/* Price Range */}
             <div className="mb-6">
-              <h4 className="font-medium mb-3">Fiyat Aralığı</h4>
+              <h4 className="font-medium mb-3 text-gray-900">Fiyat Aralığı</h4>
               <div className="space-y-2">
                 {priceRanges.map((range) => (
-                  <label key={range.value} className="flex items-center">
+                  <label key={range.value} className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       value={range.value}
@@ -196,7 +177,7 @@ export default function CityPage({ params }: CityPageProps) {
                       }}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="ml-3 text-sm">{range.label}</span>
+                    <span className="ml-3 text-sm text-gray-900 font-medium">{range.label}</span>
                   </label>
                 ))}
               </div>
@@ -204,11 +185,11 @@ export default function CityPage({ params }: CityPageProps) {
 
             {/* Rating */}
             <div className="mb-6">
-              <h4 className="font-medium mb-3">Minimum Puan</h4>
+              <h4 className="font-medium mb-3 text-gray-900">Minimum Puan</h4>
               <select
                 value={filters.rating || ''}
                 onChange={(e) => updateFilter('rating', e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium"
               >
                 <option value="">Tümü</option>
                 <option value="4">4+ Yıldız</option>
@@ -219,34 +200,34 @@ export default function CityPage({ params }: CityPageProps) {
 
             {/* Special Filters */}
             <div>
-              <h4 className="font-medium mb-3">Özel Filtreler</h4>
+              <h4 className="font-medium mb-3 text-gray-900">Özel Filtreler</h4>
               <div className="space-y-2">
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={filters.isOpen || false}
                     onChange={(e) => updateFilter('isOpen', e.target.checked)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="ml-3 text-sm">Şu anda açık</span>
+                  <span className="ml-3 text-sm text-gray-900 font-medium">Şu anda açık</span>
                 </label>
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={filters.hasDelivery || false}
                     onChange={(e) => updateFilter('hasDelivery', e.target.checked)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="ml-3 text-sm">Teslimat var</span>
+                  <span className="ml-3 text-sm text-gray-900 font-medium">Teslimat var</span>
                 </label>
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={filters.accessibility || false}
                     onChange={(e) => updateFilter('accessibility', e.target.checked)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="ml-3 text-sm">Engelli erişimi</span>
+                  <span className="ml-3 text-sm text-gray-900 font-medium">Engelli erişimi</span>
                 </label>
               </div>
             </div>
@@ -270,7 +251,7 @@ export default function CityPage({ params }: CityPageProps) {
                 <select
                   value={filters.sortBy || 'rating'}
                   onChange={(e) => updateFilter('sortBy', e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium bg-white"
                 >
                   <option value="rating">En Yüksek Puan</option>
                   <option value="reviews">En Çok Yorum</option>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
+import { Providers } from './providers'
 import { Header } from '@/components/Header'
 import { Toaster } from '@/components/ui/toaster'
 
@@ -45,13 +46,15 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="tr">
         <body className={inter.className}>
-          <div className="min-h-screen bg-gray-50">
-            <Header />
-            <main className="pb-16">
-              {children}
-            </main>
-          </div>
-          <Toaster />
+          <Providers>
+            <div className="min-h-screen bg-gray-50">
+              <Header />
+              <main className="pb-16">
+                {children}
+              </main>
+            </div>
+            <Toaster />
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

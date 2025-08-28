@@ -16,6 +16,7 @@ interface BusinessCardProps {
   onShare?: (business: Business) => void
   variant?: 'default' | 'compact' | 'featured'
   showAI?: boolean
+  searchQuery?: string
 }
 
 export function BusinessCard({ 
@@ -25,7 +26,8 @@ export function BusinessCard({
   onLike,
   onShare,
   variant = 'default',
-  showAI = true
+  showAI = true,
+  searchQuery
 }: BusinessCardProps) {
   const { full, half, empty } = generateStarRating(business.avgRating)
   const isOpen = business.workingHours ? isBusinessOpen(business.workingHours) : false

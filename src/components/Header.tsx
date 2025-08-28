@@ -33,27 +33,41 @@ export function Header() {
                 placeholder="Restoran, kafe, berber... ara"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
               />
             </div>
           </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/kesfet" className="text-gray-700 hover:text-blue-600 transition-colors">
+            <Link href="/kesfet" className="text-gray-900 hover:text-blue-600 transition-colors font-medium">
               Keşfet
             </Link>
-            <Link href="/kategoriler" className="text-gray-700 hover:text-blue-600 transition-colors">
+            <Link href="/harita" className="flex items-center text-gray-900 hover:text-blue-600 transition-colors font-medium">
+              <MapPin className="w-4 h-4 mr-1" />
+              Harita
+            </Link>
+            <Link href="/kategoriler" className="text-gray-900 hover:text-blue-600 transition-colors font-medium">
               Kategoriler
             </Link>
-            <Link href="/trendler" className="flex items-center text-gray-700 hover:text-blue-600 transition-colors">
+            <Link href="/trendler" className="flex items-center text-gray-900 hover:text-blue-600 transition-colors font-medium">
               <TrendingUp className="w-4 h-4 mr-1" />
               Trendler
             </Link>
+            {isSignedIn && (
+              <>
+                <Link href="/profil" className="text-gray-900 hover:text-blue-600 transition-colors font-medium">
+                  Profilim
+                </Link>
+                <Link href="/dashboard" className="text-gray-900 hover:text-blue-600 transition-colors font-medium">
+                  İşletme Paneli
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* User Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 ml-8">
             {isSignedIn ? (
               <>
                 {/* Notifications */}
@@ -85,12 +99,12 @@ export function Header() {
             ) : (
               <div className="flex items-center space-x-3">
                 <SignInButton mode="modal">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="outline" size="sm" className="bg-white text-gray-900 border-gray-600 hover:bg-gray-50 hover:border-gray-700 font-medium shadow-sm">
                     Giriş Yap
                   </Button>
                 </SignInButton>
                 <SignInButton mode="modal">
-                  <Button size="sm">
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm">
                     Kayıt Ol
                   </Button>
                 </SignInButton>
@@ -118,7 +132,7 @@ export function Header() {
               placeholder="Restoran, kafe, berber... ara"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
             />
           </div>
         </div>
@@ -128,25 +142,39 @@ export function Header() {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t">
           <div className="px-4 py-3 space-y-2">
-            <Link href="/kesfet" className="block py-2 text-gray-700 hover:text-blue-600">
+            <Link href="/kesfet" className="block py-2 text-gray-900 hover:text-blue-600 font-medium">
               Keşfet
             </Link>
-            <Link href="/kategoriler" className="block py-2 text-gray-700 hover:text-blue-600">
+            <Link href="/harita" className="flex items-center py-2 text-gray-900 hover:text-blue-600 font-medium">
+              <MapPin className="w-4 h-4 mr-2" />
+              Harita
+            </Link>
+            <Link href="/kategoriler" className="block py-2 text-gray-900 hover:text-blue-600 font-medium">
               Kategoriler
             </Link>
-            <Link href="/trendler" className="flex items-center py-2 text-gray-700 hover:text-blue-600">
+            <Link href="/trendler" className="flex items-center py-2 text-gray-900 hover:text-blue-600 font-medium">
               <TrendingUp className="w-4 h-4 mr-2" />
               Trendler
             </Link>
+            {isSignedIn && (
+              <>
+                <Link href="/profil" className="block py-2 text-gray-900 hover:text-blue-600 font-medium">
+                  Profilim
+                </Link>
+                <Link href="/dashboard" className="block py-2 text-gray-900 hover:text-blue-600 font-medium">
+                  İşletme Paneli
+                </Link>
+              </>
+            )}
             {!isSignedIn && (
               <div className="pt-3 border-t">
                 <SignInButton mode="modal">
-                  <Button variant="outline" className="w-full mb-2">
+                  <Button variant="outline" className="w-full mb-2 bg-white text-gray-900 border-gray-600 hover:bg-gray-50 hover:border-gray-700 font-medium shadow-sm">
                     Giriş Yap
                   </Button>
                 </SignInButton>
                 <SignInButton mode="modal">
-                  <Button className="w-full">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm">
                     Kayıt Ol
                   </Button>
                 </SignInButton>
