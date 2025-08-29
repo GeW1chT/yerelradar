@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -42,7 +42,7 @@ model User {
   checkIns          CheckIn[]
   notifications     Notification[]
   achievements      UserAchievement[]
-  helpfulVotes      ReviewHelpful[]
+  helpfulVotesGiven ReviewHelpful[]
   reportsMade       Report[] @relation("Reporter")
   reportsReceived   Report[] @relation("Reported")
 
@@ -113,7 +113,7 @@ model Review {
   cleanlinessScore  Float?    @default(0)
   priceScore        Float?    @default(0)
   atmosphereScore   Float?    @default(0)
-  aiTags            String[]  @default([])
+  aiTags            Json      @default("[]")
   aiSummary         String?
   helpfulCount      Int       @default(0)
   isVerifiedVisit   Boolean   @default(false)
@@ -202,7 +202,7 @@ model BusinessImage {
   url        String
   caption    String?
   order      Int      @default(0)
-  aiTags     String[] @default([])
+  aiTags     Json     @default("[]")
   aiAnalysis Json?    // AI photo analysis
   createdAt  DateTime @default(now())
 
@@ -217,7 +217,7 @@ model ReviewImage {
   reviewId   String
   url        String
   caption    String?
-  aiTags     String[] @default([])
+  aiTags     Json     @default("[]")
   aiAnalysis Json?    // AI photo analysis
   createdAt  DateTime @default(now())
 
@@ -373,7 +373,7 @@ model CityInsight {
   id              String   @id @default(cuid())
   city            String
   date            DateTime
-  risingCategories String[] @default([])
+  risingCategories Json     @default("[]")
   peakHours       Json     // {"monday": {"breakfast": "08:00-10:00"}}
   averagePrices   Json     // {"coffee": 25, "dinner": 180}
   seasonalTrends  String?

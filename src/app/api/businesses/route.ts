@@ -171,82 +171,91 @@ export async function GET(request: NextRequest) {
 
     const validatedQuery = querySchema.parse(queryData)
 
-    // For now, use mock data. Replace with Prisma when database is ready
-    let filteredBusinesses = mockBusinesses.filter(business => {
-      // City filter
-      if (validatedQuery.city && business.city.toLowerCase() !== validatedQuery.city.toLowerCase()) {
-        return false
-      }
-      
-      // Category filter
-      if (validatedQuery.category && business.category.toLowerCase() !== validatedQuery.category.toLowerCase()) {
-        return false
-      }
-      
-      // District filter
-      if (validatedQuery.district && business.district.toLowerCase() !== validatedQuery.district.toLowerCase()) {
-        return false
-      }
-      
-      // Search filter
-      if (validatedQuery.search) {
-        const searchTerm = validatedQuery.search.toLowerCase()
-        const searchableText = `${business.name} ${business.description} ${business.category}`.toLowerCase()
-        if (!searchableText.includes(searchTerm)) {
-          return false
+    // Build Prisma where clause
+    const where: any = {}
+    
+    if (validatedQuery.city) {
+      where.city = { contains: validatedQuery.city }
+    }
+    
+    if (validatedQuery.category) {
+      where.category = { contains: validatedQuery.category }
+    }
+    
+    if (validatedQuery.district) {
+      where.district = { contains: validatedQuery.district }
+    }
+    
+    if (validatedQuery.search) {
+      where.OR = [
+        { name: { contains: validatedQuery.search } },
+        { description: { contains: validatedQuery.search } },
+        { category: { contains: validatedQuery.search } }
+      ]
+    }
+    
+    if (validatedQuery.minRating) {
+      where.avgRating = { gte: validatedQuery.minRating }
+    }
+    
+    if (validatedQuery.priceRange && validatedQuery.priceRange.length > 0) {
+      where.priceRange = { in: validatedQuery.priceRange }
+    }
+    
+    if (validatedQuery.verified) {
+      where.verified = true
+    }
+    
+    if (validatedQuery.premium) {
+      where.isPremium = true
+    }
+
+    // Build order by clause
+    let orderBy: any = {}
+    switch (validatedQuery.sortBy) {
+      case 'name':
+        orderBy = { name: 'asc' }
+        break
+      case 'rating':
+        orderBy = { avgRating: 'desc' }
+        break
+      case 'reviews':
+        orderBy = { totalReviews: 'desc' }
+        break
+      case 'trending':
+        orderBy = { trendScore: 'desc' }
+        break
+      default:
+        orderBy = { avgRating: 'desc' }
+    }
+
+    // Get businesses from database
+    const [businesses, totalCount] = await Promise.all([
+      prisma.business.findMany({
+        where,
+        orderBy,
+        skip: validatedQuery.offset,
+        take: validatedQuery.limit,
+        include: {
+          images: {
+            take: 3,
+            orderBy: { order: 'asc' }
+          },
+          workingHours: true,
+          amenities: true
         }
-      }
-      
-      // Rating filter
-      if (validatedQuery.minRating && business.avgRating < validatedQuery.minRating) {
-        return false
-      }
-      
-      // Price range filter
-      if (validatedQuery.priceRange && validatedQuery.priceRange.length > 0 && !validatedQuery.priceRange.includes(business.priceRange as any)) {
-        return false
-      }
-      
-      // Verified filter
-      if (validatedQuery.verified && !business.verified) {
-        return false
-      }
-      
-      // Premium filter
-      if (validatedQuery.premium && !business.isPremium) {
-        return false
-      }
-      
-      return true
-    })
-
-    // Sort businesses
-    filteredBusinesses.sort((a, b) => {
-      switch (validatedQuery.sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name, 'tr')
-        case 'rating':
-          return b.avgRating - a.avgRating
-        case 'reviews':
-          return b.totalReviews - a.totalReviews
-        case 'trending':
-          return b.trendScore - a.trendScore
-        default:
-          return b.avgRating - a.avgRating
-      }
-    })
-
-    // Pagination
-    const paginatedBusinesses = filteredBusinesses.slice(validatedQuery.offset, validatedQuery.offset + validatedQuery.limit)
+      }),
+      prisma.business.count({ where })
+    ])
 
     return NextResponse.json({
       success: true,
-      data: paginatedBusinesses,
+      data: businesses,
       meta: {
-        total: filteredBusinesses.length,
+        total: totalCount,
         limit: validatedQuery.limit,
         offset: validatedQuery.offset,
-        hasMore: validatedQuery.offset + validatedQuery.limit < filteredBusinesses.length,
+        hasMore: validatedQuery.offset + validatedQuery.limit < totalCount,
         filters: {
           city: validatedQuery.city,
           category: validatedQuery.category,

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { MapPin, Navigation, Loader2 } from 'lucide-react'
+import { loadGoogleMaps, isGoogleMapsLoaded } from '@/lib/google-maps-loader'
 
 interface Business {
   id: string
@@ -49,7 +50,7 @@ export default function GoogleMap({
         setError(null)
 
         // Check if Google Maps is already loaded
-        if (typeof window !== 'undefined' && window.google) {
+        if (typeof window !== 'undefined' && isGoogleMapsLoaded()) {
           createMap()
         } else {
           // Load Google Maps dynamically
@@ -99,22 +100,7 @@ export default function GoogleMap({
     }
   }, [map, showUserLocation, businesses.length])
 
-  const loadGoogleMaps = async () => {
-    return new Promise((resolve, reject) => {
-      if (window.google) {
-        resolve(window.google)
-        return
-      }
 
-      const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
-      script.async = true
-      script.defer = true
-      script.onload = () => resolve(window.google)
-      script.onerror = reject
-      document.head.appendChild(script)
-    })
-  }
 
   const createMap = () => {
     if (!mapRef.current || !window.google) return

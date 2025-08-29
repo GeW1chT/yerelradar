@@ -177,7 +177,7 @@ export async function getUserStats(userId: string) {
         followingCount: user._count.followedUsers,
         followerCount: user._count.followers,
         averageRating: user.reviews.length > 0 
-          ? user.reviews.reduce((sum, review) => sum + review.rating, 0) / user.reviews.length 
+          ? user.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / user.reviews.length 
           : 0
       }
     }

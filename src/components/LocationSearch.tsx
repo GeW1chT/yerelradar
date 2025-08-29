@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { MapPin, Crosshair, Loader2 } from 'lucide-react'
+import { loadGoogleMaps, isGoogleMapsLoaded } from '@/lib/google-maps-loader'
 
 interface LocationSearchProps {
   onLocationSelect?: (location: {
@@ -31,7 +32,7 @@ export default function LocationSearch({
     const initAutocomplete = async () => {
       try {
         // Load Google Maps if not already loaded
-        if (!window.google) {
+        if (!isGoogleMapsLoaded()) {
           await loadGoogleMaps()
         }
 
@@ -60,22 +61,7 @@ export default function LocationSearch({
     initAutocomplete()
   }, [])
 
-  const loadGoogleMaps = async () => {
-    return new Promise((resolve, reject) => {
-      if (window.google) {
-        resolve(window.google)
-        return
-      }
 
-      const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
-      script.async = true
-      script.defer = true
-      script.onload = () => resolve(window.google)
-      script.onerror = reject
-      document.head.appendChild(script)
-    })
-  }
 
   const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
     if (!place.geometry?.location) return

@@ -8,6 +8,22 @@ import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
+// Check if Clerk keys are properly configured
+const isClerkConfigured = 
+  typeof window !== 'undefined' ? false : // Disable on client side for now
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== 'your_clerk_publishable_key_here' &&
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== 'pk_test_örnek_anahtar_buraya_gelecek' &&
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith('pk_')
+
+// Conditional Clerk Provider wrapper
+function ConditionalClerkProvider({ children }: { children: React.ReactNode }) {
+  if (isClerkConfigured) {
+    return <ClerkProvider>{children}</ClerkProvider>
+  }
+  return <>{children}</>
+}
+
 export const metadata: Metadata = {
   title: 'YerelRadar - Yapay Zeka ile Güçlendirilmiş Yerel İşletme Keşif Platformu',
   description: 'AI destekli yorumlar, akıllı öneriler ve yerel kahramanlarla şehrinizdeki en iyi işletmeleri keşfedin.',
@@ -43,7 +59,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
+    <ConditionalClerkProvider>
       <html lang="tr">
         <body className={inter.className}>
           <Providers>
@@ -57,6 +73,6 @@ export default function RootLayout({
           </Providers>
         </body>
       </html>
-    </ClerkProvider>
+    </ConditionalClerkProvider>
   )
 }
