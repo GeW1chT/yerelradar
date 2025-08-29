@@ -8,5 +8,13 @@
         "lint": false
       }
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "PRISMA_CLIENT_ENGINE_TYPE": "dataproxy"
+    }
+  },
+  "env": {
+    "DATABASE_URL": "@database_url"
+  }
 }
