@@ -85,28 +85,28 @@ export async function checkAndAwardAchievements(
   totalReviews: number
 ): Promise<void> {
   try {
-    const achievements = []
+    const achievements: string[] = []
 
     // Define achievement criteria
     if (totalReviews >= 1) achievements.push('FIRST_REVIEW')
     if (totalReviews >= 10) achievements.push('REVIEW_VETERAN')
     if (totalReviews >= 50) achievements.push('REVIEW_MASTER')
-    if (experiencePoints >= 100) achievements.push('POINT_COLLECTOR')
-    if (experiencePoints >= 1000) achievements.push('EXPERIENCE_EXPERT')
+    if (totalReviews >= 100) achievements.push('REVIEW_LEGEND')
+    if (experiencePoints >= 5000) achievements.push('LOCAL_HERO')
 
     // Award achievements that user doesn't have yet
     for (const achievement of achievements) {
       await prisma.userAchievement.upsert({
         where: {
-          userId_achievement: {
+          userId_achievementId: {
             userId,
-            achievement
+            achievementId: achievement
           }
         },
         update: {},
         create: {
           userId,
-          achievement,
+          achievementId: achievement,
           earnedAt: new Date()
         }
       })
@@ -177,7 +177,7 @@ export async function getUserStats(userId: string) {
         followingCount: user._count.followedUsers,
         followerCount: user._count.followers,
         averageRating: user.reviews.length > 0 
-          ? user.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / user.reviews.length 
+          ? user.reviews.reduce((sum: number, review: { rating: number }) => sum + review.rating, 0) / user.reviews.length 
           : 0
       }
     }

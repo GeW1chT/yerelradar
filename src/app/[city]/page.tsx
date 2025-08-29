@@ -72,7 +72,7 @@ export default function CityPage({ params }: CityPageProps) {
 
   const cityName = resolvedParams.city.charAt(0).toUpperCase() + resolvedParams.city.slice(1)
 
-  const updateFilter = (key: keyof SearchFilters, value: any) => {
+  const updateFilter = (key: keyof SearchFilters, value: string | number | boolean | string[] | undefined) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 

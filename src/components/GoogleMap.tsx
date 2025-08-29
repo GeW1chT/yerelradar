@@ -151,7 +151,7 @@ export default function GoogleMap({
       marker.addListener('click', () => {
         // Close other info windows
         markers.forEach(m => {
-          const existingInfoWindow = (m as any).infoWindow
+          const existingInfoWindow = (m as google.maps.Marker & { infoWindow?: google.maps.InfoWindow }).infoWindow
           if (existingInfoWindow) {
             existingInfoWindow.close()
           }
@@ -165,7 +165,7 @@ export default function GoogleMap({
       })
 
       // Store info window reference
-      ;(marker as any).infoWindow = infoWindow
+      ;(marker as google.maps.Marker & { infoWindow?: google.maps.InfoWindow }).infoWindow = infoWindow
 
       // Highlight selected business
       if (selectedBusinessId === business.id) {

@@ -152,7 +152,7 @@ async function main() {
   ]
 
   // İşletmeleri oluştur
-  const createdBusinesses = []
+  const createdBusinesses: any[] = []
   for (const business of businesses) {
     const created = await prisma.business.create({
       data: business
